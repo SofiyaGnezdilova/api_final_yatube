@@ -2,11 +2,9 @@ from api.mixins import CreateRetrieveViewSet
 from api.permissions import AuthorOrReadOnlyPermission
 from api.serializers import (CommentSerializer, FollowSerializer,
                              GroupSerializer, PostSerializer, UserSerializer)
-from posts.models import Group, Post, User
-
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
-
+from posts.models import Group, Post, User
 from rest_framework import filters, permissions, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (IsAuthenticated,
@@ -59,16 +57,13 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class FollowViewSet(CreateRetrieveViewSet):
-    """Возращает подписки пользователя или офрмляет подписку"""
     serializer_class = FollowSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('following__username',)
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        user = self.request.user
-        return user.user.all()
+        return self.request.user.user.all()
 
     def perform_create(self, serializer):
-        user = self.request.user
-        serializer.save(user=user)
+        serializer.save(user=self.request.user)
